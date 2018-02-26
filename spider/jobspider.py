@@ -11,6 +11,10 @@ from bs4 import BeautifulSoup
 # 用于连接mysql数据库
 import pymysql
 
+# 用于连接redis数据库
+import redis
+
+
 # 确定要爬取的url
 url = 'http://search.51job.com/list/070200,000000,0000,00,9,99,Java,2,{}.html'
 
@@ -143,8 +147,17 @@ def export_to_mysql(result):
         db.commit()
     except Exception as e:
         print(e)
+
         db.rollback()
     db.close()
+
+
+# 将数据导出到redis
+def export_to_redis(result):
+    # 连接到redis
+    r = redis.Redis(host="192.168.6.54",port=6379,db=0,charset="gbk")
+    for item in result:
+        r.lpush("jobs",str(item))
 
 
 
@@ -153,6 +166,7 @@ code = load_html()
 # print(code)
 result = parse_html(code)
 # print(result)
-export_to_mysql(result)
+# export_to_mysql(result)
+export_to_redis(result)
 
 print("success..................")
