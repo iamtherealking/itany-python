@@ -17,6 +17,10 @@ import redis
 # 用于Excel读写操作
 from openpyxl import Workbook
 
+# 导入time 模块
+import time
+
+
 # 确定要爬取的url
 url = 'http://search.51job.com/list/070200,000000,0000,00,9,99,Java,2,{}.html'
 
@@ -173,11 +177,11 @@ def export_to_excel(result):
     # 创建工作表
     wb = Workbook()
     # 创建worksheet
+
     sheet = wb.create_sheet("招聘信息",0)
     # 向表格中添加一行数据
     # 参数是一个list
     sheet.append(["职位名","公司名","工作地点","薪资","发布时间"])
-
     # 写入数据
     for item in result:
         sheet.append([item['job'],item['company'],item['address'],item['salary'],item['publishDate']])
@@ -197,3 +201,8 @@ result = parse_html(code)
 # read_from_redis()
 export_to_excel(result)
 print("success..................")
+
+
+# 完善代码，实现每4秒抓取一个页面。抓取前5页
+# 将数据导出
+
