@@ -14,6 +14,8 @@ import pymysql
 # 用于连接redis数据库
 import redis
 
+# 用于Excel读写操作
+from openpyxl import Workbook
 
 # 确定要爬取的url
 url = 'http://search.51job.com/list/070200,000000,0000,00,9,99,Java,2,{}.html'
@@ -155,9 +157,33 @@ def export_to_mysql(result):
 # 将数据导出到redis
 def export_to_redis(result):
     # 连接到redis
-    r = redis.Redis(host="192.168.6.54",port=6379,db=0,charset="gbk")
+    r = redis.Redis(host="localhost",port=6379,db=0,charset="gbk")
     for item in result:
-        r.lpush("jobs",str(item))
+        r.lpush("jobs", str(item))
+
+
+# 从redis读取数据
+def read_from_redis():
+    r = redis.Redis(host="localhost", port=6379, db=0, charset="gbk" , decode_responses=True)
+    print(r.lrange("jobs",0,-1))
+
+
+# 导出到Excel文件中
+def export_to_excel(result):
+    # 创建工作表
+    wb = Workbook()
+    # 创建worksheet
+    sheet = wb.create_sheet("招聘信息",0)
+    # 向表格中添加一行数据
+    # 参数是一个list
+    sheet.append(["职位名","公司名","工作地点","薪资","发布时间"])
+
+    # 写入数据
+    for item in result:
+        sheet.append([item['job'],item['company'],item['address'],item['salary'],item['publishDate']])
+
+    # 将工作簿保存到本地文件系统
+    wb.save("export.xlsx")
 
 
 
@@ -167,6 +193,7 @@ code = load_html()
 result = parse_html(code)
 # print(result)
 # export_to_mysql(result)
-export_to_redis(result)
-
+# export_to_redis(result)
+# read_from_redis()
+export_to_excel(result)
 print("success..................")
