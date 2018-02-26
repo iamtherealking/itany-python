@@ -1,0 +1,13 @@
+
+DROP  DATABASE  IF EXISTS python;
+CREATE DATABASE python;
+use python;
+
+CREATE TABLE t_jobs(
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  job VARCHAR(200),
+  company VARCHAR(200),
+  salary VARCHAR(100),
+  address VARCHAR(100),
+  publishDate VARCHAR(100)
+)ENGINE = innodb DEFAULT CHARSET GBK;

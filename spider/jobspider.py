@@ -8,6 +8,9 @@ from urllib import request
 # 用于解析处理HTML格式的字符串
 from bs4 import BeautifulSoup
 
+# 用于连接mysql数据库
+import pymysql
+
 # 确定要爬取的url
 url = 'http://search.51job.com/list/070200,000000,0000,00,9,99,Java,2,{}.html'
 
@@ -24,6 +27,7 @@ headers = {
 }
 
 
+# 进行爬取操作
 def do_spider():
     page_no = 1
     # 创建请求对象，并且同时设置请求头
@@ -43,12 +47,14 @@ def do_spider():
     return html_code
 
 
+# 测试方法
 def load_html():
     file = open("template.html",encoding="gbk")
     html_code = file.read()
     return html_code;
 
 
+# 解析html
 def parse_html(html):
     # 方式1  使用正则表达式
     # 方式2  使用Xpath  是爬虫框架scrapy 所必须的技术
@@ -77,14 +83,76 @@ def parse_html(html):
     # fot = soup.select(".footer .nag")
     # print(fot)
 
-
+    # get_text() 获取标签内容 获取标签中的所有文字，包括子标签中的文字
     # text = soup.select("#area_channel_layer .tle")[0].get_text()
     # print(str(text).strip())
-    pass
+
+    result_list = []
+    content_div = soup.select("#resultList")[0]
+    item_divs = content_div.select(".el")
+
+    # 去除表头，由于range 本身就是左闭右开，所以不需要len-1
+    for item_div_index in range(1,len(item_divs)):
+        # 对应一条数据
+        item_div = item_divs[item_div_index]
+        # print(item_div.get_text().strip())
+        # job = item_div.p.get_text().strip()
+        spans = item_div.find_all("span")
+        # 将数据封装成 字典
+        result_item = {
+            "job": spans[0].get_text().strip(),
+            "company": spans[1].get_text().strip(),
+            "address": spans[2].get_text().strip(),
+            "salary": spans[3].get_text().strip(),
+            "publishDate": spans[4].get_text().strip()
+        }
+        # 将字典（每条数据） 放到列表中
+        result_list.append(result_item)
+    return result_list
+
+
+# 存储到mysql
+def export_to_mysql(result):
+    # 创建 连接信息的 字典
+    config = {
+        "host": "localhost",
+        "port": 3306,  # 默认是3306，可以不写
+        "user": "root",
+        "passwd": "",
+        "db": "python",
+        "charset": "gbk"
+    }
+    # 获取Connection
+    db = pymysql.connect(**config)
+    # 获取游标对象（cursor）, 其实对应PreparedStatement对象
+    cursor = db.cursor()
+    try:
+        # 遍历参数中的所有的数据
+        for item in result:
+            # 创建sql语句
+            sql = '''
+                insert into
+                    t_jobs
+                    (job,address,salary,company,publishDate)
+                values 
+                    ('%s','%s','%s','%s','%s')                  
+            ''' % (item['job'],item['address'],item['salary'],item['company'],item['publishDate'])
+
+            # 执行sql语句
+            cursor.execute(sql)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+    db.close()
+
 
 
 # code = do_spider()
 code = load_html()
 # print(code)
-parse_html(code)
+result = parse_html(code)
+# print(result)
+export_to_mysql(result)
 
+print("success..................")
