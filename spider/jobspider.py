@@ -38,8 +38,7 @@ headers = {
 
 
 # 进行爬取操作
-def do_spider():
-    page_no = 1
+def do_spider(page_no=1):
     # 创建请求对象，并且同时设置请求头
     req = request.Request(url.format(page_no), headers=headers)
     # 打开创建的请求，并读取响应的数据
@@ -50,7 +49,6 @@ def do_spider():
     # str 将任意类型转换为字符串类型，第二个参数是字符集
     # 对于爬虫而言，该字符集是 爬取的网站的字符集
     html_code = str(html_bytes, "gbk")
-    # page_no += 1
 
     # file = open("template.html",mode="w",encoding="gbk")
     # file.write(html_code)
