@@ -148,4 +148,59 @@ $$
   由于商品受到的评价较少。导致该商品无法进入评价列表
 
 
+**实现步骤**
+
+1. 获取用户-商品的评分数据（数据集，用于机器学习的学习数据）
+
+   [github上的数据集](https://github.com/sfcuiyi/awesome-public-datasets)
+
+2. 创建矩阵
+
+   使用 pandas 读取数据，numpy 创建矩阵（user_id,book_id）= rate
+
+3. 找出“邻居”
+
+   - 欧式距离
+
+     平面直角坐标系中两个单的距离
+     $$
+     d = \sqrt{(x~_1-x_2)~2 + (y_1-y_2)~2}
+     $$
+
+   - 曼哈顿距离
+
+     城市街区距离
+     $$
+     d = |x_1-x_2| + |y_1-y_2|
+     $$
+
+   - 切比雪夫距离
+     $$
+     d = max(|x_1-x_2|,|y_1-y_2|)
+     $$
+
+   - **夹角余弦 cosine**
+     $$
+     cosθ = \frac{x_1x_2 + y_1y_2}{\sqrt{x_1~2+y_1~2}\sqrt{x_2~2+y_2~2}}
+     $$
+
+     ```python
+     # 是python中针对机器学习开发的开源模块
+     # 该模块已经支持： 
+     #     SVM算法，最近邻居算法，逻辑回归，随机森林，决策树 和 神经网络
+     # scikit-learn
+     import sklearn
+     # 皮尔逊距离
+     from sklearn.metrics.pairwise import pairwise_distances
+
+     pairwise_distances(matrix,metric="cosine")
+     ```
+
+     ​
+
+4. 进行推荐
+
+
+
+
 
